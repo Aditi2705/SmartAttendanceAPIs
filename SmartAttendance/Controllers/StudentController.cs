@@ -1,0 +1,106 @@
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using SmartAttendance.DTOs.Admin;
+using SmartAttendance.Interfaces;
+using SmartAttendance.Models;
+using SmartAttendance.Repositories;
+
+namespace SmartAttendance.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+
+    public class StudentController : Controller
+    {
+
+        private readonly IStudentRepository _studentRepo;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly IMapper _mapper;
+
+        public StudentController(IStudentRepository studentRepo, UserManager<AppUser> userManager, IMapper mapper)
+        {
+            _studentRepo = studentRepo;
+            _userManager = userManager;
+            _mapper = mapper;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllStudents()
+        {
+            var student = await _studentRepo.GetAll();
+            return Ok(_mapper.Map<IEnumerable<CreateStudentDto>>(student));
+
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var student = await _studentRepo.GetById(id);
+            if (student == null)
+            {
+                return NotFound();
+            }
+            return Ok(_mapper.Map<CreateStudentDto>(student));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateStudent(CreateStudentDto studentDto)
+        {
+            // ✅ Step 1: Create AppUser
+            var user = new AppUser
+            {
+                FullName = studentDto.FullName,
+                Email = studentDto.Email,
+                UserName = studentDto.Email, // username = email
+            };
+
+            var result = await _userManager.CreateAsync(user, studentDto.Password);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            // ✅ Step 2: Map DTO → Student and link UserId
+            var student = _mapper.Map<Student>(studentDto);
+            student.UserId = user.Id; // Link Student with AppUser
+
+            await _studentRepo.Add(student);
+            await _studentRepo.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Student created successfully",
+                student = _mapper.Map<CreateStudentDto>(student)
+            });
+        }
+
+            [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, UpdateStudentDto dto)
+        {
+            var student = await _studentRepo.GetById(id);
+            if (student == null)
+            {
+                return NotFound();
+            }
+            _mapper.Map(dto, student);
+            await _studentRepo.Update(student);
+            await _studentRepo.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var student = await _studentRepo.GetById(id);
+            if (student == null) return NotFound();
+
+            await _studentRepo.Delete(id);
+            await _studentRepo.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+    }
+}
