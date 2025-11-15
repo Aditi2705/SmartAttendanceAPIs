@@ -16,6 +16,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add CORS policy for development to allow local frontend to call the API.
+// Change or restrict origins for production.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowDev", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // Register DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -77,6 +89,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Enable CORS policy (development). Place before authentication/authorization so
+// that preflight requests are handled and CORS headers are present on responses.
+app.UseCors("AllowDev");
 
 app.UseAuthentication();  
 app.UseAuthorization();
