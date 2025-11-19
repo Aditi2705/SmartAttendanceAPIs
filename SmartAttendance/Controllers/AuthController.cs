@@ -17,16 +17,20 @@ namespace SmartAttendance.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenService;
+        private readonly IStudentRepository _studentRepo;
 
         public AuthController(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
-            ITokenService tokenService)
+            ITokenService tokenService,
+            IStudentRepository studentRepo)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
+            _studentRepo = studentRepo;
         }
+
 
         // ✅ REGISTER API
         [HttpPost("register")]
@@ -94,6 +98,9 @@ namespace SmartAttendance.Controllers
             if (!result.Succeeded)
                 return Unauthorized(new { message = "Incorrect password." });
 
+            // Get user roles
+            var roles = await _userManager.GetRolesAsync(user);
+
             // Generate token
             var token = _tokenService.CreateToken(user);
 
@@ -105,8 +112,38 @@ namespace SmartAttendance.Controllers
                     fullName = user.FullName,
                     email = user.Email,
                     username = user.UserName,
-                    role = user.Role
+                    roles = roles
                 },
+                token
+            });
+        }
+
+        // LOGIN by student roll number (convenience endpoint used by frontend)
+        [HttpPost("students/login")]
+        public async Task<IActionResult> LoginByRollNo([FromBody] LoginByRollDto dto)
+        {
+            if (dto == null || string.IsNullOrEmpty(dto.RollNo) || string.IsNullOrEmpty(dto.Password))
+                return BadRequest(new { message = "rollNo and password required" });
+
+            // Find student by roll no
+            var student = await _studentRepo.GetByRollNoAsync(dto.RollNo);
+            if (student == null)
+                return Unauthorized(new { message = "Invalid roll number or user not found." });
+
+            // Find associated AppUser
+            var user = await _userManager.FindByIdAsync(student.UserId);
+            if (user == null)
+                return Unauthorized(new { message = "User not found for this student." });
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
+            if (!result.Succeeded)
+                return Unauthorized(new { message = "Incorrect password." });
+
+            var token = _tokenService.CreateToken(user);
+            return Ok(new
+            {
+                message = "Login successful.",
+                user = new { fullName = user.FullName, email = user.Email, username = user.UserName, role = user.Role },
                 token
             });
         }

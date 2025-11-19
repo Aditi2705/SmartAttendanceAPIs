@@ -10,11 +10,15 @@ namespace SmartAttendance.Models
         [Required]
         public int StudentId { get; set; }
         public string? StudentName { get; set; }
+    // Navigation property to Student (optional)
+    public Student? Student { get; set; }
         
 
         [Required]
         public int SubjectId { get; set; }
         public string? SubjectName { get; set; }
+    // Navigation property to Subject (optional)
+    public Subject? Subject { get; set; }
         
         public string? CourseName { get; set; }
         public int Year { get; set; }

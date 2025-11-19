@@ -19,7 +19,7 @@ namespace SmartAttendance.Repositories
             return attendance; 
         }
 
-        public async Task<Attendance> DeleteAttendanceAsync(int attendanceId)
+        public async Task<Attendance?> DeleteAttendanceAsync(int attendanceId)
         {
             var attendance = await _context.Attendances.FindAsync(attendanceId);
             if (attendance != null)
@@ -27,7 +27,12 @@ namespace SmartAttendance.Repositories
                 _context.Attendances.Remove(attendance);
                 await _context.SaveChangesAsync();
             }
-            return null;
+            return attendance;
+        }
+
+        public async Task<IEnumerable<Attendance>> GetAllAsync()
+        {
+            return await _context.Attendances.ToListAsync();
         }
 
         public async Task<IEnumerable<Attendance>> GetAttendanceByStudentIdAsync(int studentId)

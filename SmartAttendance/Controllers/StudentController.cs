@@ -10,7 +10,7 @@ namespace SmartAttendance.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class StudentController : Controller
     {
 
@@ -44,8 +44,9 @@ namespace SmartAttendance.Controllers
             return Ok(_mapper.Map<CreateStudentDto>(student));
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateStudent(CreateStudentDto studentDto)
+    [HttpPost]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<IActionResult> CreateStudent(CreateStudentDto studentDto)
         {
             // ✅ Step 1: Create AppUser
             var user = new AppUser

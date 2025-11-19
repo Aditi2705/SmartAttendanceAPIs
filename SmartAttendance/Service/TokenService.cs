@@ -18,7 +18,9 @@ namespace SmartAttendance.Service
         public TokenService(IConfiguration config)
         {
             _config = config;
-            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SigningKey"]));
+            // Read the same keys as appsettings.json: Jwt:Key, Jwt:Issuer, Jwt:Audience
+            var signingKey = _config["Jwt:Key"] ?? _config["JWT:SigningKey"] ?? string.Empty;
+            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey));
         }
 
         // 🔹 Generate JWT Token for logged-in user
@@ -42,8 +44,8 @@ namespace SmartAttendance.Service
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(7),   // Token validity (7 days)
                 SigningCredentials = creds,
-                Issuer = _config["JWT:Issuer"],
-                Audience = _config["JWT:Audience"]
+                Issuer = _config["Jwt:Issuer"] ?? _config["JWT:Issuer"],
+                Audience = _config["Jwt:Audience"] ?? _config["JWT:Audience"]
             };
 
             // ✅ Create and return token string

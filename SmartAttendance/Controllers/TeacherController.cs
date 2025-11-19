@@ -9,6 +9,7 @@ namespace SmartAttendance.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class TeacherController : ControllerBase
     {
         private readonly ITeacherRepository _teacherRepo;

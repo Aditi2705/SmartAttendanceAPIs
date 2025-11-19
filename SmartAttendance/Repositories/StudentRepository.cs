@@ -19,19 +19,19 @@ namespace SmartAttendance.Repositories
         public async Task<Student> Add(Student student)
         {
             await _context.Students.AddAsync(student);
-            await _context.SaveChangesAsync();
+            // Don't save here - let caller manage SaveChanges
             return student;
         }
 
-        public async Task<Student> Delete(int id)
+        public async Task<Student?> Delete(int id)
         {
             var student = await _context.Students.FindAsync(id);
             if (student != null)
             {
                 _context.Students.Remove(student);
-                await _context.SaveChangesAsync();
+                // Don't save here - let caller manage SaveChanges
             }
-            return null;
+            return student;
         }
 
         public async Task<IEnumerable<Student>> GetAll()
@@ -42,6 +42,11 @@ namespace SmartAttendance.Repositories
         public async Task<Student?> GetById(int id)
         {
             return await _context.Students.FindAsync(id);
+        }
+
+        public async Task<Student?> GetByRollNoAsync(string rollNo)
+        {
+            return await _context.Students.FirstOrDefaultAsync(s => s.RollNo == rollNo);
         }
 
         public async Task<bool> SaveChangesAsync()

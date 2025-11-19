@@ -10,6 +10,9 @@ namespace SmartAttendance.Mapping
         {
             CreateMap<Student, CreateStudentDto>().ReverseMap();
             CreateMap<Student, UpdateStudentDto>().ReverseMap();
+            CreateMap<Student, StudentListDto>()
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User != null ? src.User.Email : ""))
+                .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.ClassName));
             CreateMap<Subject, CreateSubjectDto>().ReverseMap();
             CreateMap<Subject, UpdateSubjectDto>().ReverseMap();
             CreateMap<Subject, GetSubjectDto>().ReverseMap();
