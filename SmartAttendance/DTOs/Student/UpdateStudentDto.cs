@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace SmartAttendance.DTOs.Admin
+namespace SmartAttendance.DTOs.Student
 {
     public class UpdateStudentDto
     {

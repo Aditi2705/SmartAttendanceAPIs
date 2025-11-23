@@ -41,6 +41,11 @@ namespace SmartAttendance.Repositories
             return await _context.Teachers.FindAsync(id);
         }
 
+        public async Task<Teacher?> GetTeacherByUserId(string userId)
+        {
+            return await _context.Teachers.FirstOrDefaultAsync(t => t.UserId == userId);
+        }
+
         public async Task<bool> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync() > 0;

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SmartAttendance.DTOs.Admin;
+using SmartAttendance.DTOs.Teacher;
 using SmartAttendance.Interfaces;
 using SmartAttendance.Models;
 
@@ -23,7 +23,20 @@ namespace SmartAttendance.Controllers
             _mapper = mapper;
         }
 
+        // GET api/teacher/me - returns the teacher record for the logged-in user
+        [HttpGet("me")]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Teacher,Admin")]
+        public async Task<IActionResult> GetMe()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+            var teacher = await _teacherRepo.GetTeacherByUserId(user.Id);
+            if (teacher == null) return NotFound();
+            return Ok(_mapper.Map<CreateTeacherDto>(teacher));
+        }
+
         [HttpGet]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
             var teacher = await _teacherRepo.GetAllTeachers();
@@ -31,6 +44,7 @@ namespace SmartAttendance.Controllers
         }
 
         [HttpGet("{id}")]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetById(int id)
         {
             var teacher = await _teacherRepo.GetTeacherById(id);
@@ -42,6 +56,7 @@ namespace SmartAttendance.Controllers
         }
 
         [HttpPost]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateTeacher(CreateTeacherDto teacherDto)
         {
             // ✅ Step 1: Create AppUser
@@ -77,6 +92,7 @@ namespace SmartAttendance.Controllers
         }
 
         [HttpPut("{id}")]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateTeacher(int id, UpdateTeacherDto teacherDto)
         {
             var teacher = await _teacherRepo.GetTeacherById(id);
@@ -91,6 +107,7 @@ namespace SmartAttendance.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var teacher = await _teacherRepo.GetTeacherById(id);

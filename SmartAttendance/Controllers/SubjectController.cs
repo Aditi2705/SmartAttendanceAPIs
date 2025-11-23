@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SmartAttendance.DTOs;
-using SmartAttendance.DTOs.Admin;
+using SmartAttendance.DTOs.Subject;
 using SmartAttendance.Interfaces;
 using SmartAttendance.Models;
 using SmartAttendance.Repositories;

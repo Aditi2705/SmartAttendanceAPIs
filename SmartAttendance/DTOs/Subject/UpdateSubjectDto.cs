@@ -1,4 +1,4 @@
-﻿namespace SmartAttendance.DTOs.Admin
+namespace SmartAttendance.DTOs.Subject
 {
     public class UpdateSubjectDto
     {

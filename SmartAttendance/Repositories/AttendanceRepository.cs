@@ -32,7 +32,7 @@ namespace SmartAttendance.Repositories
 
         public async Task<IEnumerable<Attendance>> GetAllAsync()
         {
-            return await _context.Attendances.ToListAsync();
+            return await _context.Attendances.Include(a => a.Student).ToListAsync();
         }
 
         public async Task<IEnumerable<Attendance>> GetAttendanceByStudentIdAsync(int studentId)

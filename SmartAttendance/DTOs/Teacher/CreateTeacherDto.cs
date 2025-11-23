@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace SmartAttendance.DTOs.Admin
+namespace SmartAttendance.DTOs.Teacher
 {
     public class CreateTeacherDto
     {
-        
-
         [Required]
         public string FullName { get; set; } = default!;
 
@@ -14,7 +12,7 @@ namespace SmartAttendance.DTOs.Admin
         public string Email { get; set; } = default!;
 
         [Required]
-        public string Password { get; set; } 
+        public string Password { get; set; }
 
         [Required]
         public string TeacherId { get; set; } = default!;
@@ -22,6 +20,4 @@ namespace SmartAttendance.DTOs.Admin
         [Required]
         public string Department { get; set; } = default!;
     }
-
 }
-

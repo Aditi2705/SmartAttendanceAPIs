@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
-using SmartAttendance.DTOs.Admin;
+using SmartAttendance.DTOs.Student;
+using SmartAttendance.DTOs.Subject;
+using SmartAttendance.DTOs.Teacher;
 using SmartAttendance.Models;
 
 namespace SmartAttendance.Mapping
@@ -18,6 +20,12 @@ namespace SmartAttendance.Mapping
             CreateMap<Subject, GetSubjectDto>().ReverseMap();
             CreateMap<Teacher, CreateTeacherDto>().ReverseMap();
             CreateMap<Teacher, UpdateTeacherDto>().ReverseMap();
+            CreateMap<Models.Attendance, DTOs.Attendance.AttendanceRecordDto>()
+                .ForMember(dest => dest.StudentId, opt => opt.MapFrom(src => src.StudentId))
+                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.StudentName))
+                .ForMember(dest => dest.Year, opt => opt.MapFrom(src => src.Year.ToString()))
+                .ForMember(dest => dest.Semester, opt => opt.MapFrom(src => src.Semester.ToString()))
+                .ForMember(dest => dest.IsPresent, opt => opt.MapFrom(src => src.IsPresent));
         }
     }
 }

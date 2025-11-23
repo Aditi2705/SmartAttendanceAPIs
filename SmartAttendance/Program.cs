@@ -74,10 +74,31 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
+// Log effective DB connection info at startup to help diagnose schema mismatches
+using (var scope = app.Services.CreateScope())
+{
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var configConn = builder.Configuration.GetConnectionString("DefaultConnection");
+        logger.LogInformation("Configured DefaultConnection: {conn}", configConn);
+
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var canConnect = db.Database.CanConnect();
+        var dbName = db.Database.GetDbConnection()?.Database;
+        logger.LogInformation("Database reachable: {ok}, Database name: {dbName}", canConnect, dbName);
+    }
+    catch (Exception ex)
+    {
+        var loggerEx = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        loggerEx.LogError(ex, "Failed to read DB connection info at startup");
+    }
+}
 
 
 

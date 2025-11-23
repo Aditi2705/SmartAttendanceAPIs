@@ -6,6 +6,7 @@ namespace SmartAttendance.Interfaces
     {
         Task<IEnumerable<Teacher>> GetAllTeachers();
         Task<Teacher?> GetTeacherById(int id);
+        Task<Teacher?> GetTeacherByUserId(string userId);
         Task <Teacher> AddTeacher(Teacher teacher);
         Task <Teacher> UpdateTeacher(Teacher teacher);
         Task <Teacher> DeleteTeacher(int id);

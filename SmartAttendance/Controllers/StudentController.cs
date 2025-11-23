@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SmartAttendance.DTOs.Admin;
+using SmartAttendance.DTOs.Student;
 using SmartAttendance.Interfaces;
 using SmartAttendance.Models;
 using SmartAttendance.Repositories;
@@ -31,6 +31,28 @@ namespace SmartAttendance.Controllers
             var student = await _studentRepo.GetAll();
             return Ok(_mapper.Map<IEnumerable<CreateStudentDto>>(student));
 
+        }
+
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMe()
+        {
+            // Get the logged-in user from the JWT claims
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { message = "User not authenticated" });
+            }
+
+            // Find the student linked to this user
+            var students = await _studentRepo.GetAll();
+            var student = students.FirstOrDefault(s => s.UserId == userId);
+
+            if (student == null)
+            {
+                return NotFound(new { message = "Student profile not found" });
+            }
+
+            return Ok(_mapper.Map<CreateStudentDto>(student));
         }
 
         [HttpGet("{id}")]

@@ -45,12 +45,17 @@ namespace SmartAttendance.Controllers
                 return BadRequest(new { message = "Email already registered." });
 
             // Create user object
+            // NOTE: For security, public registration will only create Student accounts.
+            // If you need to create an Admin or Teacher account, use the admin-only flow
+            // (create via Admin API or create account manually), see documentation.
+            var roleToAssign = "Student"; // force Student for public registration
+
             var appUser = new AppUser
             {
                 FullName = registerDto.FullName,
                 UserName = registerDto.UserName.ToLower(),
                 Email = registerDto.Email,
-                Role = registerDto.Role // "Admin", "Teacher", or "Student"
+                Role = roleToAssign
             };
 
             var result = await _userManager.CreateAsync(appUser, registerDto.Password);
@@ -58,13 +63,13 @@ namespace SmartAttendance.Controllers
             if (!result.Succeeded)
                 return StatusCode(500, result.Errors);
 
-            // Assign role
-            var roleResult = await _userManager.AddToRoleAsync(appUser, registerDto.Role);
+            // Assign role (forced to Student for public registration)
+            var roleResult = await _userManager.AddToRoleAsync(appUser, roleToAssign);
             if (!roleResult.Succeeded)
                 return StatusCode(500, roleResult.Errors);
 
-            // Generate token
-            var token = _tokenService.CreateToken(appUser);
+            // Generate token (pass assigned role so token contains correct role claim)
+            var token = _tokenService.CreateToken(appUser, new[] { roleToAssign });
 
             return Ok(new
             {
@@ -101,8 +106,8 @@ namespace SmartAttendance.Controllers
             // Get user roles
             var roles = await _userManager.GetRolesAsync(user);
 
-            // Generate token
-            var token = _tokenService.CreateToken(user);
+            // Generate token (pass roles so token contains accurate role claims)
+            var token = _tokenService.CreateToken(user, roles);
 
             return Ok(new
             {
@@ -139,7 +144,8 @@ namespace SmartAttendance.Controllers
             if (!result.Succeeded)
                 return Unauthorized(new { message = "Incorrect password." });
 
-            var token = _tokenService.CreateToken(user);
+            var roles = await _userManager.GetRolesAsync(user);
+            var token = _tokenService.CreateToken(user, roles);
             return Ok(new
             {
                 message = "Login successful.",

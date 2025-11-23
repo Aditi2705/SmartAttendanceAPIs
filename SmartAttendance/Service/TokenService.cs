@@ -24,16 +24,28 @@ namespace SmartAttendance.Service
         }
 
         // 🔹 Generate JWT Token for logged-in user
-        public string CreateToken(AppUser user)
+        public string CreateToken(AppUser user, IEnumerable<string>? roles = null)
         {
             // ✅ Claims: These are pieces of info stored inside the token
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),           // User ID
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""), // User Email
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? ""), // Username
-                new Claim(ClaimTypes.Role, user.Role ?? "Student")          // User Role (Admin/Teacher/Student)
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? "") // Username
             };
+
+            // Add role claims from passed-in roles (preferred) or fall back to AppUser.Role
+            if (roles != null)
+            {
+                foreach (var r in roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, r));
+                }
+            }
+            else
+            {
+                claims.Add(new Claim(ClaimTypes.Role, user.Role ?? "Student"));
+            }
 
             // ✅ Create signing credentials using secret key
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
